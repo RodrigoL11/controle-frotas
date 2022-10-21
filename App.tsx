@@ -1,7 +1,6 @@
 import React from 'react'
 import { ThemeProvider } from 'styled-components'
 import { AuthProvider } from './src/hooks/auth';
-import AppLoading from 'expo-app-loading'
 
 import theme from './src/global/styles/theme'
 import Routes from './src/routes/Router'
@@ -23,10 +22,6 @@ export default function App() {
     Poppins_600SemiBold,
     Poppins_700Bold
   });
-
-  if(!fontsLoaded) {
-    return <AppLoading />;
-  }
 
   return (
     <AuthProvider>

@@ -119,7 +119,7 @@ export const HistoryLabel = styled.Text`
 
 export const Empty = styled.Text`
   color: ${({theme}) => theme.colors.secondary_color};
-  font-family: ${({theme}) => theme.fonts.semiBold};
+  font-family: ${({theme}) => theme.fonts.medium};
   font-size: 18px;
   margin-left: 25px;
   margin-right: 10px;

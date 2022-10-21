@@ -13,8 +13,8 @@ interface Props extends TouchableOpacityProps{
 
 export default function Button({title, reverse, ...rest}: Props){
     return(
-        <Container reverse={reverse} {...rest} activeOpacity={0.55}>
-            <Title reverse={reverse}> {title}</Title>
+        <Container reverse={reverse} {...rest} activeOpacity={0.65}>
+            <Title reverse={reverse}>{title}</Title>
         </Container>
     );
 }

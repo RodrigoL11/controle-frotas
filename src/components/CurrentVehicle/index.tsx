@@ -21,15 +21,17 @@ import {
   Title
 } from './styles'
 import { useAuth } from '../../hooks/auth';
-import { getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { IVehicle } from '../../interfaces/main';
 import { Modal } from 'react-native';
 import Vehicles from '../Vehicles';
+import { db } from '../../config/Firebase';
 
 export default function CurrentVehicle() {
   const [currentVehicle, setCurrentVehicle] = useState<IVehicle>();
   const [show, setShow] = useState(false);
   const { authData } = useAuth();
+  console.log(currentVehicle)
 
   const toogleModal = () => {
     setShow(!show);
@@ -37,11 +39,35 @@ export default function CurrentVehicle() {
 
   const loadData = async () => {
     if (!authData?.refCurrentVehicle) return null;
-
+    
     try {
       const doc = await getDoc(authData.refCurrentVehicle);
-      setCurrentVehicle(doc.data() as IVehicle)
+      
+      if(!doc.data()) return null;
+
+      setCurrentVehicle(
+        {   
+          ...doc.data() as IVehicle,
+          id: doc.id
+        }
+      )      
     } catch (error) { }
+  }
+
+  const disassociateVehicle = async () => {
+    if(!currentVehicle || !authData) return null;
+
+    try{
+      await updateDoc(doc(db, "Vehicles", currentVehicle.id), {
+        refUser: "",
+      });
+
+      await updateDoc(doc(db, "Users", authData.id), {
+        refCurrentVehicle: "",
+      });
+
+      setCurrentVehicle(undefined);
+    } catch (error) { console.error(error) }
   }
 
   useEffect(() => {
@@ -73,7 +99,7 @@ export default function CurrentVehicle() {
             <Feather name="refresh-ccw" size={24} color="#fff" />
             <ButtonTitle>Trocar de veículo</ButtonTitle>
           </ChangeButton>
-          <DisassociateButton onPress={toogleModal}>
+          <DisassociateButton onPress={disassociateVehicle}>
             <ButtonTitle>Desassociar</ButtonTitle>
           </DisassociateButton>
         </Row>
@@ -91,7 +117,10 @@ export default function CurrentVehicle() {
         onRequestClose={toogleModal}
         statusBarTranslucent={true}
       >
-        <Vehicles toogleModal={toogleModal} />
+        <Vehicles 
+        toogleModal={toogleModal} 
+        vehicleID={currentVehicle ? currentVehicle.id : ""} 
+        setCurrentVehicle={setCurrentVehicle} />
       </Modal>
     </Container>
   )

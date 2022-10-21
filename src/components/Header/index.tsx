@@ -25,7 +25,7 @@ const pad = (val: number) => {
 }
 
 const formatDate = (date: Date) => {
-  return `${daysOfWeek[date.getDay()]}, ${pad(date.getDate())}/${pad(date.getMonth())}/${date.getFullYear()}`
+  return `${daysOfWeek[date.getDay()]}, ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`
 }
 
 export default function Header() {
