@@ -1,11 +1,12 @@
-import { DocumentReference } from "firebase/firestore"
+import { DocumentReference, Timestamp } from "firebase/firestore"
 
 export interface IUser{
   id: string,
   name: string,
   login: string,
   password: string,
-  refCurrentVehicle: DocumentReference
+  refCurrentVehicle: DocumentReference,
+  refCurrentTravel: DocumentReference
 }
 
 export interface IVehicle{
@@ -16,4 +17,14 @@ export interface IVehicle{
   plate_number: string,
   status: string,
   refUser: DocumentReference
+}
+
+export interface ITravel{
+  id: string,
+  refUser: DocumentReference,
+  refVehicle: DocumentReference,
+  created_at: Timestamp,
+  finalized_at?: Timestamp,
+  odometer_start: number,
+  odometer_end?: number
 }

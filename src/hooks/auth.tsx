@@ -7,7 +7,8 @@ export interface AuthData {
     id: string,
     login: string,
     name: string,
-    refCurrentVehicle: DocumentReference
+    refCurrentVehicle: DocumentReference,
+    refCurrentTravel: DocumentReference
 }
 
 interface AuthContextData {

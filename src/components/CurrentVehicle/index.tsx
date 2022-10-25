@@ -12,6 +12,7 @@ import {
   CheckContainer,
   Column,
   Container,
+  DateLabel,
   DisassociateButton,
   Empty,
   HistoryLabel,
@@ -20,42 +21,56 @@ import {
   SubTitle,
   Title
 } from './styles'
+
 import { useAuth } from '../../hooks/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { IVehicle } from '../../interfaces/main';
+import { doc, getDoc, Timestamp, updateDoc } from 'firebase/firestore';
+import { ITravel, IVehicle } from '../../interfaces/main';
 import { Modal } from 'react-native';
 import Vehicles from '../Vehicles';
 import { db } from '../../config/Firebase';
+import { toDateTime } from '../../utils/date';
+import { showMessage } from 'react-native-flash-message';
 
 export default function CurrentVehicle() {
   const [currentVehicle, setCurrentVehicle] = useState<IVehicle>();
+  const [currentTravel, setCurrentTravel] = useState<ITravel>();
   const [show, setShow] = useState(false);
   const { authData } = useAuth();
-  console.log(currentVehicle)
 
   const toogleModal = () => {
     setShow(!show);
   }
 
   const loadData = async () => {
-    if (!authData?.refCurrentVehicle) return null;
+    if (!authData) return null;
     
     try {
-      const doc = await getDoc(authData.refCurrentVehicle);
+      const vehicle = await getDoc(authData.refCurrentVehicle);
+      const travel = await getDoc(authData.refCurrentTravel);
       
-      if(!doc.data()) return null;
+      if(!vehicle.data()) return null;
+      if(!travel.data()) return null;
 
       setCurrentVehicle(
         {   
-          ...doc.data() as IVehicle,
-          id: doc.id
+          ...vehicle.data() as IVehicle,
+          id: vehicle.id
         }
-      )      
+      )    
+      
+      console.log(travel.data(), vehicle.data())
+
+      setCurrentTravel(
+        {
+          ...travel.data() as ITravel,
+          id: travel.id
+        }
+      )
     } catch (error) { }
   }
 
   const disassociateVehicle = async () => {
-    if(!currentVehicle || !authData) return null;
+    if(!currentVehicle || !authData || !currentTravel) return null;
 
     try{
       await updateDoc(doc(db, "Vehicles", currentVehicle.id), {
@@ -64,9 +79,20 @@ export default function CurrentVehicle() {
 
       await updateDoc(doc(db, "Users", authData.id), {
         refCurrentVehicle: "",
+        refCurrentTravel: "",
       });
 
+      await updateDoc(doc(db, "Travels", currentTravel.id), {        
+        finalized_at: Timestamp.now(),
+        odometer_end: 100,
+      })
+
       setCurrentVehicle(undefined);
+      setCurrentTravel(undefined);
+      showMessage({
+        message: "Veículo desassociado com sucesso",
+        type: "success",
+      })
     } catch (error) { console.error(error) }
   }
 
@@ -81,10 +107,14 @@ export default function CurrentVehicle() {
       <Card>
         <Row>
           <Ionicons name="md-car-sport-outline" size={42} color="#b4b4b4" />
-          {currentVehicle
+          {currentVehicle && currentTravel
             ? <Column>
               <CardTitle>{currentVehicle.name}</CardTitle>
               <PlateNumber>{currentVehicle.plate_number}</PlateNumber>
+              <Row>
+              <DateLabel>Desde: </DateLabel>
+              <DateLabel>{toDateTime(currentTravel.created_at.seconds)}</DateLabel>
+              </Row>
             </Column>
             : <Empty>Não está associado a nenhum carro</Empty>
           }
@@ -119,8 +149,11 @@ export default function CurrentVehicle() {
       >
         <Vehicles 
         toogleModal={toogleModal} 
-        vehicleID={currentVehicle ? currentVehicle.id : ""} 
-        setCurrentVehicle={setCurrentVehicle} />
+        vehicleID={currentVehicle ? currentVehicle.id : ""}
+        travelID={currentTravel ? currentTravel.id : ""} 
+        setCurrentVehicle={setCurrentVehicle} 
+        setCurrentTravel={setCurrentTravel}
+        />
       </Modal>
     </Container>
   )

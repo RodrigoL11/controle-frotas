@@ -1,7 +1,7 @@
-import { collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { db } from '../../config/Firebase';
-import { IUser, IVehicle } from '../../interfaces/main';
+import { ITravel, IUser, IVehicle } from '../../interfaces/main';
 import { Ionicons } from '@expo/vector-icons'
 import Button from '../Button/'
 
@@ -17,6 +17,7 @@ import {
   SelectContainer
 } from './styles'
 import { useAuth } from '../../hooks/auth';
+import { showMessage } from 'react-native-flash-message';
 
 interface VehicleProps {
   vehicle: IVehicle,
@@ -52,12 +53,14 @@ const Vehicle = ({ vehicle, isSelected, onPress, currentVehicleID }: VehicleProp
 }
 
 interface Props {
-  toogleModal: () => void;
-  vehicleID: string;
-  setCurrentVehicle: Dispatch<SetStateAction<IVehicle | undefined>>
+  toogleModal: () => void,
+  vehicleID: string,
+  travelID: string,
+  setCurrentVehicle: Dispatch<SetStateAction<IVehicle | undefined>>,
+  setCurrentTravel: Dispatch<SetStateAction<ITravel | undefined>>
 }
 
-export default function Vehicles({ toogleModal, vehicleID, setCurrentVehicle }: Props) {
+export default function Vehicles({ toogleModal, vehicleID, travelID, setCurrentVehicle, setCurrentTravel }: Props) {
   const [vehicles, setVehicles] = useState<IVehicle[]>([]);
   const [selected, setSelected] = useState(vehicleID);
 
@@ -101,30 +104,60 @@ export default function Vehicles({ toogleModal, vehicleID, setCurrentVehicle }: 
   const handleSubmit = async () => {
     if (!authData) return null;
 
-    if(vehicleID){
+    if(vehicleID && travelID){
       try {
         await updateDoc(doc(db, "Vehicles", vehicleID), {
           refUser: "",
         });
+
+        await updateDoc(doc(db, "Travels", travelID), {
+          finalized_at: Timestamp.now(),
+          odometer_end: 100,
+        })
+
       } catch (err) { console.error(err) }
     }
     
     try {
       let refVehicle = doc(db, "Vehicles", selected);
       let refUser = doc(db, "Users", authData.id);
+      let _travelID = '';
+
+      const travelData = {
+        created_at: Timestamp.now(),
+        odometer_start: 1000,
+        refUser: refUser,
+        refVehicle: refVehicle
+      }
+
+      await addDoc(collection(db, "Travels"), travelData).then((response) => {
+        _travelID = response.id
+      })
 
       await updateDoc(refVehicle, {
         refUser: refUser
       });
 
       await updateDoc(refUser, {
-        refCurrentVehicle: refVehicle
+        refCurrentVehicle: refVehicle,
+        refCurrentTravel: doc(db, "Travels", _travelID)
       });
 
+
+      setCurrentVehicle(vehicles.find(v => v.id === selected))
+      
+      setCurrentTravel({
+        ...travelData,
+        id: _travelID
+      })
+
+      showMessage({
+        message: vehicleID && travelID ? "Veículo alterado com sucesso" : "Veículo associado com sucesso",
+        type: "success",
+      })
     } catch (err) { }
 
-    toogleModal();
-    setCurrentVehicle(vehicles.find(v => v.id === selected))
+    toogleModal();    
   }
 
   return (

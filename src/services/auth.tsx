@@ -25,7 +25,8 @@ async function signIn(login: string, password: string): Promise<AuthData> {
                     id: user.id,                    
                     login: user.login,
                     name: user.name, 
-                    refCurrentVehicle: user.refCurrentVehicle,                   
+                    refCurrentVehicle: user.refCurrentVehicle,
+                    refCurrentTravel: user.refCurrentTravel                   
                 })
             } else {
                 reject(new Error('Credenciais Inválidas'));

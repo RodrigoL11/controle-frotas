@@ -1,5 +1,5 @@
 {
-  "editor.fontFamily": "Fira Code",
+  "editor.fontFamily": "Consolas, 'Courier New', monospace",
   "editor.tabSize": 2,
   "editor.fontLigatures": true,
 }

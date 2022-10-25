@@ -124,3 +124,13 @@ export const Empty = styled.Text`
   margin-left: 25px;
   margin-right: 10px;
 `
+
+export const DateLabel = styled.Text`
+  color: ${({theme}) => theme.colors.secondary_color};
+  font-family: ${({theme}) => theme.fonts.regular};
+  font-size: 11px;
+`
+
+export const CountDown = styled.Text`
+
+`

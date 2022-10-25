@@ -1,6 +1,7 @@
 import React from 'react'
 import { ThemeProvider } from 'styled-components'
 import { AuthProvider } from './src/hooks/auth';
+import FlashMessage from "react-native-flash-message";
 
 import theme from './src/global/styles/theme'
 import Routes from './src/routes/Router'
@@ -27,6 +28,7 @@ export default function App() {
     <AuthProvider>
       <ThemeProvider theme={theme}>
         <Routes />
+        <FlashMessage position='top' />
       </ThemeProvider>
     </AuthProvider>
   );
