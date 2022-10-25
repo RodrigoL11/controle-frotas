@@ -16,6 +16,7 @@ export interface IVehicle{
   name: string,
   plate_number: string,
   status: string,
+  odometer: number,
   refUser: DocumentReference
 }
 
@@ -26,5 +27,7 @@ export interface ITravel{
   created_at: Timestamp,
   finalized_at?: Timestamp,
   odometer_start: number,
-  odometer_end?: number
+  odometer_end?: number,
+  destiny: string,
+  reason: string
 }

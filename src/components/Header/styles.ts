@@ -35,6 +35,6 @@ export const Name = styled.Text`
 export const Icon = styled.TouchableOpacity`
   position: absolute;
   top: 20px;
-  left: 20px;
+  left: 10px;
 `
 

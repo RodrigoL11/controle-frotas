@@ -12,8 +12,8 @@ import {
 
 export default function SignIn() {
   const { signIn } = useAuth();
-  const [login, setLogin] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [login, setLogin] = useState<string>('Rodrigo');
+  const [password, setPassword] = useState<string>('123');
   const [secureText, setSecureText] = useState<boolean>(true);
 
   return (

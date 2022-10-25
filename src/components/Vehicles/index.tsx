@@ -18,12 +18,14 @@ import {
 } from './styles'
 import { useAuth } from '../../hooks/auth';
 import { showMessage } from 'react-native-flash-message';
+import { KeyboardAvoidingView, Modal } from 'react-native';
+import CreateTravel from '../TravelModals/CreateTravel';
 
 interface VehicleProps {
   vehicle: IVehicle,
   isSelected: boolean,
   onPress: () => void,
-  currentVehicleID: string
+  currentVehicleID: string,
 }
 
 const Vehicle = ({ vehicle, isSelected, onPress, currentVehicleID }: VehicleProps) => {
@@ -57,12 +59,17 @@ interface Props {
   vehicleID: string,
   travelID: string,
   setCurrentVehicle: Dispatch<SetStateAction<IVehicle | undefined>>,
-  setCurrentTravel: Dispatch<SetStateAction<ITravel | undefined>>
+  setCurrentTravel: Dispatch<SetStateAction<ITravel | undefined>>,
+  oldOdometer: number
 }
 
-export default function Vehicles({ toogleModal, vehicleID, travelID, setCurrentVehicle, setCurrentTravel }: Props) {
+export default function Vehicles({ toogleModal, vehicleID, travelID, oldOdometer, setCurrentVehicle, setCurrentTravel }: Props) {
   const [vehicles, setVehicles] = useState<IVehicle[]>([]);
   const [selected, setSelected] = useState(vehicleID);
+  const [odometer, setOdometer] = useState<number>(0);
+  const [destiny, setDestiny] = useState<string>("");
+  const [reason, setReason] = useState<string>("");
+  const [show, setShow] = useState<boolean>(false)
 
   const { authData } = useAuth()
 
@@ -102,32 +109,23 @@ export default function Vehicles({ toogleModal, vehicleID, travelID, setCurrentV
   }, [])
 
   const handleSubmit = async () => {
-    if (!authData) return null;
+    if (!authData || !destiny || !reason) return null;
 
-    if(vehicleID && travelID){
-      try {
-        await updateDoc(doc(db, "Vehicles", vehicleID), {
-          refUser: "",
-        });
-
-        await updateDoc(doc(db, "Travels", travelID), {
-          finalized_at: Timestamp.now(),
-          odometer_end: 100,
-        })
-
-      } catch (err) { console.error(err) }
-    }
-    
     try {
       let refVehicle = doc(db, "Vehicles", selected);
       let refUser = doc(db, "Users", authData.id);
+
+      const _doc = await getDoc(refVehicle);
+      const vehicle = _doc.data() as IVehicle;
       let _travelID = '';
 
       const travelData = {
         created_at: Timestamp.now(),
-        odometer_start: 1000,
+        odometer_start: vehicle.odometer,
         refUser: refUser,
-        refVehicle: refVehicle
+        refVehicle: refVehicle,
+        destiny: destiny.trim(),
+        reason: reason.trim(),
       }
 
       await addDoc(collection(db, "Travels"), travelData).then((response) => {
@@ -143,22 +141,28 @@ export default function Vehicles({ toogleModal, vehicleID, travelID, setCurrentV
         refCurrentTravel: doc(db, "Travels", _travelID)
       });
 
-
       setCurrentVehicle(vehicles.find(v => v.id === selected))
-      
+
       setCurrentTravel({
         ...travelData,
-        id: _travelID
+        id: _travelID,
+        destiny: destiny.trim(),
+        reason: reason.trim(),
       })
 
       showMessage({
-        message: vehicleID && travelID ? "Veículo alterado com sucesso" : "Veículo associado com sucesso",
+        message: "Veículo associado com sucesso",
         type: "success",
       })
-    } catch (err) { }
-
-    toogleModal();    
+    } catch (err) {
+      console.error(err)
+    }
+    toogleModal();
   }
+
+  useEffect(() => {
+    handleSubmit();
+  }, [destiny, reason])
 
   return (
     <Container>
@@ -177,7 +181,24 @@ export default function Vehicles({ toogleModal, vehicleID, travelID, setCurrentV
           currentVehicleID={vehicleID}
         />
       ))}
-      <Button title='Salvar' onPress={handleSubmit} />
+      <Button title='Salvar' onPress={() => {
+        setShow(true);
+      }} />
+
+      <Modal
+        visible={show}
+        onRequestClose={() => setShow(false)}
+        statusBarTranslucent={true}
+        transparent={true}
+      >
+        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+          <CreateTravel
+            _setDestiny={setDestiny}
+            _setReason={setReason}
+            toogleModal={() => setShow(false)}            
+          />
+        </KeyboardAvoidingView>
+      </Modal>
     </Container>
   )
 }

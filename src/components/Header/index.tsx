@@ -16,8 +16,6 @@ interface Props{
   name: string
 }
 
-
-
 const daysOfWeek = ['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado']
 
 const pad = (val: number) => {
@@ -30,7 +28,7 @@ const formatDate = (date: Date) => {
 
 export default function Header() {
   const currentDate = new Date();
-  const { signOut, authData } = useAuth();
+  const { signOut, authData } = useAuth();  
 
   const SignOut = () => {
     Alert.alert("Adeus", "Deseja realmente sair da conta?", [

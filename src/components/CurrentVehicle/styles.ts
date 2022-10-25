@@ -32,7 +32,7 @@ export const Card = styled.View`
   align-items: center;
   padding: 0px 15px;
   margin-bottom: 25px;
-  min-height: 65px;
+  height: 90px;
 `
 
 export const Row = styled.View`
@@ -49,6 +49,7 @@ export const CardTitle = styled.Text`
   color: ${({theme}) => theme.colors.secondary_color};
   font-family: ${({theme}) => theme.fonts.regular};
   font-size: 15px;
+  margin-bottom: -8px;
 `
 
 export const PlateNumber = styled.Text`
@@ -88,8 +89,7 @@ export const DisassociateButton = styled.TouchableOpacity`
   background-color: ${({theme}) => theme.colors.background};
   border-radius: 7px;
   height: 44px;
-  width: 40%;
-  position: absolute;
+  width: 100%;
   right: 0;
 `
 
@@ -107,7 +107,7 @@ export const Bar = styled.View`
   width: 100%;
   height: 0.7px;
   background-color: ${({theme}) => theme.colors.secondary_color};
-  margin: 25px 0;
+  margin: 20px 0;
 `
 
 export const HistoryLabel = styled.Text`
@@ -126,11 +126,13 @@ export const Empty = styled.Text`
 `
 
 export const DateLabel = styled.Text`
-  color: ${({theme}) => theme.colors.secondary_color};
-  font-family: ${({theme}) => theme.fonts.regular};
+  color: ${({theme}) => theme.colors.text_color};
+  font-family: ${({theme}) => theme.fonts.light};
   font-size: 11px;
 `
 
-export const CountDown = styled.Text`
-
+export const TravelLabel = styled.Text`
+  color: ${({theme}) => theme.colors.text_color};
+  font-family: ${({theme}) => theme.fonts.semiBold};
+  font-size: 12px;
 `
